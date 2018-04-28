@@ -26,10 +26,6 @@ require("debug.php");
 $authentificated=false;
 $errormessage="";
 
-
-//debug("Request start");
-
-
 //http://php.net/manual/de/function.ip2long.php
 function clientInSameSubnet($client_ip=false,$server_ip=false) {
     if (!$client_ip) {
@@ -59,18 +55,6 @@ function clientInSameSubnet($client_ip=false,$server_ip=false) {
     $nmask = $bcast & $smask;
     return (($ipadr & $smask) == ($nmask & $smask));
 }
-
-
-//mini Login wenn remote IP nicht im Subnetz des Servers
-/*
-if( clientInSameSubnet() ) {
-    $authentificated = true;
-} else {
-    echo "LOGIN";
-    exit;
-}
-*/
-
 
 function compareDevicesByName($a, $b) {
    return strcmp($a->name,$b->name);
@@ -141,10 +125,6 @@ function compareTimersByName($a, $b) {
    return strcmp($a->name,$b->name);
 }
 
-
-
-
-
 // Über Tastenfunktion -> POST
 if (isset($_POST['action'])) {
     $r_action = (string)$_POST['action'];
@@ -165,8 +145,6 @@ if (isset($_GET['timerrun'])) {
     exit();
 }
 
-
-
 if (isset($r_action)) {
     debug("Running in action='".$r_action."'");  
 
@@ -185,7 +163,16 @@ if (isset($r_action)) {
             usleep($multiDeviceSleep);
         }
         echo $errormessage;
-
+        
+    } else if (($r_action)=="status") {
+     
+      $devicesFound = $xml->xpath("//devices/device/id[text()='".$r_id."']/parent::*");
+      $device = $devicesFound[0];
+      
+      $status['state'] = (string) $device->status;
+      
+      echo json_encode($status);   
+        
     } else {
         if (($r_action)=="on") { 
             $action="ON"; 
@@ -251,5 +238,5 @@ if (isset($r_action)) {
     debug("Sending HTML Site");  
     require("gui.php");
 } 
-    //debug("END");  
+
 ?> 
